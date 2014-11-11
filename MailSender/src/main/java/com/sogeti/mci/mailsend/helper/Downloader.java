@@ -98,6 +98,7 @@ public class Downloader {
 				DataSource source = new ByteArrayDataSource(baos.toByteArray(), contentType);
 				mimeBodyPart.setDataHandler(new DataHandler(source));
 			    mimeBodyPart.setFileName(filename);
+			    mimeBodyPart.setHeader("Content-Type", contentType);
 			    multipart.addBodyPart(mimeBodyPart);
 			   
 			} catch (Exception e) {
