@@ -76,8 +76,8 @@ public class DriveService {
 					try {
 						Drive.Files.Get request = drive.files().get(mail.getAttachments()[i]);
 						File file = request.execute();
-						logger.debug(mail.getHash(), "URL: " + file.getDownloadUrl());
 						if(file != null){
+							logger.debug(mail.getHash(), "URL: " + file.getDownloadUrl());
 							multipart1 = downloader.downloadAttachment(drive, file.getDownloadUrl(), multipart1, file.getTitle(), file.getMimeType(), mail.getHash());
 						} 
 					} catch (Exception e) {

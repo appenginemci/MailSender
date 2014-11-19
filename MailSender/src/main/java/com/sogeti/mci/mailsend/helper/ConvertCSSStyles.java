@@ -33,9 +33,14 @@ public class ConvertCSSStyles {
             e.remove();
         }
         
+        // Replace padding in style from body element
+        String pattern = "(<body.*style=\".*padding:)([^\"^;]*)([\";].*)";
+		String newBodyPaddingStyle = "10pt 10pt 10pt 10pt";
+        
         return doc.outerHtml().replaceAll( "##RightSimpleQuote", "&rsquo;").replaceAll("##LeftSimpleQuote", "&lsquo;")
 				.replaceAll("##RightDoubleQuote", "&rdquo;").replaceAll("##LeftDoubleQuote","&ldquo;").replaceAll("li-before","li:before")
-				.replace("</head>", "<style type=\"text/css\">li:before {content: \"-\"; padding-right: 5px;}</style></head>");
+				.replace("</head>", "<style type=\"text/css\">li:before {content: \"-\"; padding-right: 5px;}</style></head>")
+				.replaceFirst(pattern, "$1" + newBodyPaddingStyle + "$3");
         //return doc.toString();
 	}
 	

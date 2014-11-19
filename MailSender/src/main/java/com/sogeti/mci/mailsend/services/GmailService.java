@@ -45,7 +45,7 @@ public class GmailService {
 	    Session session = Session.getDefaultInstance(props, null);
 	    MimeMessage message = new MimeMessage(session);
 	    logger.debug(mail.getHash(), "starting processing email sending");
-		if(mail != null && message != null){
+		if(message != null){
 			if (gmail == null){
 				gmail = googleServiceInitializator.getGmailService();
 				logger.debug(mail.getHash(), "Gmail service has been initialized");
@@ -72,7 +72,7 @@ public class GmailService {
 							}
 						}
 					}
-					if (mail.getEventAddress() != null && mail.getEventAddress().trim() != ""){
+					if (mail.getEventAddress() != null && !mail.getEventAddress().trim().equals("")){
 						InternetAddress[] tAddressReplyTo = new InternetAddress[1];
 						tAddressReplyTo[0] = new InternetAddress(mail.getEventAddress().trim());
 						message.setReplyTo(tAddressReplyTo);
@@ -84,6 +84,8 @@ public class GmailService {
 					}
 					logger.debug(mail.getHash(), "about to call Gmail API");
 					gmailMessage = gmail.users().messages().send("apps.engine@mci-group.com", gmailMessage).execute();
+					//gmailMessage = gmail.users().messages().send("event.test.1@mci-group.com", gmailMessage).execute();
+					//gmailMessage = gmail.users().messages().send("arnaud.landier@mci-group.com", gmailMessage).execute();
 					logger.debug(mail.getHash(), gmailMessage.toPrettyString());
 					result = "OK";
 				} catch (AddressException ex) {
@@ -95,8 +97,6 @@ public class GmailService {
 			} else {
 				logger.error(mail.getHash(), "Gmail service could not be initialized");
 			}
-		} else {
-			if (message == null) logger.error(mail.getHash(), "Error while retrieving the content of the email");
 		}
 
 		return result;

@@ -28,17 +28,18 @@ public class GoogleServiceInitializator {
 	@Autowired
 	private LoggerDAO logger;
 	
-	private GoogleCredential googleCredential = null;
+	private GoogleCredential googleCredentialDrive = null;
+	private GoogleCredential googleCredentialGmail = null;
 
 	public Drive getDriveService(){
 		Drive drive = null;
-		if (googleCredential == null) {
+		if (googleCredentialDrive == null) {
 			logger.debug("", "About to generate new credentials for Google Services");
-			googleCredential = generateGoogleCredentialItem();
+			googleCredentialDrive = generateGoogleCredentialDrive();
 		}
-		if(googleCredential != null){
+		if(googleCredentialDrive != null){
 			logger.debug("", "Valid credential for Google Services retrieved. About to instantiate Drive Service.");
-			drive = new Drive.Builder(new NetHttpTransport(), new JacksonFactory(), googleCredential).setApplicationName("MailSender").build();
+			drive = new Drive.Builder(new NetHttpTransport(), new JacksonFactory(), googleCredentialDrive).setApplicationName("MailSender").build();
 		} else {
 			logger.error("", "Could not get valid credential for Google Services");
 		}
@@ -48,13 +49,13 @@ public class GoogleServiceInitializator {
 
 	public Gmail getGmailService(){
 		Gmail gmail = null;
-		if (googleCredential == null) {
+		if (googleCredentialGmail == null) {
 			logger.debug("", "About to generate new credentials for Google Services");
-			googleCredential = generateGoogleCredentialItem();
+			googleCredentialGmail = generateGoogleCredentialGmail();
 		}
-		if(googleCredential != null){
+		if(googleCredentialGmail != null){
 			logger.debug("", "Valid credential for Google Services retrieved. About to instantiate Gmail Service.");
-			gmail = new Gmail.Builder(new NetHttpTransport(), new JacksonFactory(), googleCredential).setApplicationName("MailSender").build();
+			gmail = new Gmail.Builder(new NetHttpTransport(), new JacksonFactory(), googleCredentialGmail).setApplicationName("MailSender").build();
 		} else {
 			logger.error("", "Could not get valid credential for Google Services");
 		}
@@ -63,61 +64,77 @@ public class GoogleServiceInitializator {
 	}
 
 	
-	private GoogleCredential generateGoogleCredentialItem(){
+	private GoogleCredential generateGoogleCredentialDrive(){
 		HttpTransport httpTransport = new NetHttpTransport();
 		JacksonFactory jsonFactory = new JacksonFactory();
-
 		GoogleCredential googleCredential = null;
-
 		Properties properties = new Properties();
-
 		try {
 			properties.load(GoogleServiceInitializator.class.getResourceAsStream("/drive-api-settings.properties"));
 			logger.debug("", "Certificate Path: " + "/" + properties.getProperty("service.certificate.path"));
 			logger.debug("", "Service Account Email: " + properties.getProperty("service.account.email"));
 			File pk12File = new File(GoogleServiceInitializator.class.getResource("/" + properties.getProperty("service.certificate.path")).toURI());
 			
-			/*googleCredential = new GoogleCredential.Builder()
+			googleCredential = new GoogleCredential.Builder()
 			.setTransport(httpTransport)
 			.setJsonFactory(jsonFactory)
 			.setServiceAccountId(properties.getProperty("service.account.email"))
-			.setServiceAccountScopes(getScopes())
+			.setServiceAccountScopes(getScopeDrive())
+			.setServiceAccountUser(properties.getProperty("user.email"))
 			.setServiceAccountPrivateKeyFromP12File(pk12File)
-			.build();*/
-			
-			/*googleCredential = new GoogleCredential.Builder()
-			.setTransport(httpTransport)
-			.setJsonFactory(jsonFactory)
-			.setServiceAccountId(properties.getProperty("service.account.email"))
-			.setServiceAccountScopes(getScopes())
-			.setServiceAccountUser("arnaud.landie@capgemini-sogeti.com")
-			.setServiceAccountPrivateKeyFromP12File(pk12File)
-			.build();*/
+			.build();		
+			if (googleCredential == null) logger.error("", "Failed to get credential for Google Services");
+		} catch (Exception e) {
+			logger.error("", "Failed to initialize Google Services", e);
+		}
+		return googleCredential;
+	}
+
+	private GoogleCredential generateGoogleCredentialGmail(){
+		HttpTransport httpTransport = new NetHttpTransport();
+		JacksonFactory jsonFactory = new JacksonFactory();
+		GoogleCredential googleCredential = null;
+		Properties properties = new Properties();
+		try {
+			properties.load(GoogleServiceInitializator.class.getResourceAsStream("/drive-api-settings.properties"));
+			logger.debug("", "Certificate Path: " + "/" + properties.getProperty("service.certificate.path"));
+			logger.debug("", "Service Account Email: " + properties.getProperty("service.account.email"));
+			File pk12File = new File(GoogleServiceInitializator.class.getResource("/" + properties.getProperty("service.certificate.path")).toURI());
 			
 			googleCredential = new GoogleCredential.Builder()
 			.setTransport(httpTransport)
 			.setJsonFactory(jsonFactory)
 			.setServiceAccountId(properties.getProperty("service.account.email"))
-			.setServiceAccountScopes(getScopes())
-			.setServiceAccountUser(properties.getProperty("user.email"))
+			.setServiceAccountScopes(getScopeGmail())
+			.setServiceAccountUser("apps.engine@mci-group.com")
+			//.setServiceAccountUser("event.test.1@mci-group.com")
+			//.setServiceAccountUser("arnaud.landier@mci-group.com")
+			//.setServiceAccountUser(properties.getProperty("user.email"))
 			.setServiceAccountPrivateKeyFromP12File(pk12File)
-			.build();
-			
+			.build();		
 			if (googleCredential == null) logger.error("", "Failed to get credential for Google Services");
 		} catch (Exception e) {
 			logger.error("", "Failed to initialize Google Services", e);
 		}
-
 		return googleCredential;
 	}
 
-
+	private static ArrayList<String> getScopeDrive(){
+		ArrayList<String> scopes = new ArrayList<String>();
+		scopes.add(DriveScopes.DRIVE);
+		return scopes;
+	}
+	
+	private static ArrayList<String> getScopeGmail(){
+		ArrayList<String> scopes = new ArrayList<String>();
+		scopes.add(GmailScopes.GMAIL_COMPOSE);
+		return scopes;
+	}
+	
 	private static ArrayList<String> getScopes(){
 		ArrayList<String> scopes = new ArrayList<String>();
-		
 		scopes.add(DriveScopes.DRIVE);
 		scopes.add(GmailScopes.GMAIL_COMPOSE);
-		
 		return scopes;
 	}
 
