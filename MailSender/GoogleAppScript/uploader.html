@@ -1,0 +1,23 @@
+<style>
+.branding-below {
+  bottom: 56px;
+  top: 0;
+}
+</style>
+<link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css" />
+<script>
+  function updateForm() {
+    var div = document.getElementById('output');
+    div.innerHTML = '<a>The attachment has been added</a>';
+    document.getElementById("myForm").reset();
+  }
+</script>
+<div class="sidebar branding-below">
+  <div class="block">
+  <form id="myForm">
+    <input name="myFile" type="file" style="padding-top:20px;padding-bottom:20px" />
+    <button class="blue" onclick="google.script.run.processFile(this.parentNode)">Attach</button>    
+  </form>
+  </div>
+</div>
+<div class="block" id="output"></div>

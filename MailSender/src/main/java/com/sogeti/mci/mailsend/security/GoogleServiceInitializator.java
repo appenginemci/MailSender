@@ -127,17 +127,11 @@ public class GoogleServiceInitializator {
 	
 	private static ArrayList<String> getScopeGmail(){
 		ArrayList<String> scopes = new ArrayList<String>();
+		scopes.add(GmailScopes.GMAIL_READONLY);
 		scopes.add(GmailScopes.GMAIL_COMPOSE);
 		return scopes;
 	}
 	
-	private static ArrayList<String> getScopes(){
-		ArrayList<String> scopes = new ArrayList<String>();
-		scopes.add(DriveScopes.DRIVE);
-		scopes.add(GmailScopes.GMAIL_COMPOSE);
-		return scopes;
-	}
-
 
 }
 
