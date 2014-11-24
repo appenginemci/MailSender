@@ -1,20 +1,25 @@
 package com.sogeti.mci.mailsend.services;
 
 import java.io.ByteArrayInputStream;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 
+import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+
+
+
 
 
 
@@ -58,7 +63,38 @@ public class GmailService {
 		}
 		if (gmail != null){
 			try {
-				message = buildNewMimeMessage_WithHeadersForReply(mail);
+				try {
+					Properties props = new Properties();
+				    Session session = Session.getDefaultInstance(props, null);
+				    message = new MimeMessage(session);
+					Message origMessage = gmail.users().messages().get("apps.engine@mci-group.com", mail.getMailId()).setFormat("raw").execute();
+				    byte[] emailBytes = Base64.decodeBase64(origMessage.getRaw());
+				    /*String previousEmailContent = convert(emailBytes);
+				    logger.debug(mail.getHash(), "previous email: " + previousEmailContent);*/
+				   
+				    
+				    MimeMessage emailOrig = new MimeMessage(session, new ByteArrayInputStream(emailBytes));
+				    
+				    Enumeration<Header> allHeaders =  emailOrig.getAllHeaders();
+					if (allHeaders != null) {
+						while (allHeaders.hasMoreElements()) {
+							Header header=allHeaders.nextElement();
+							logger.debug(mail.getHash(), "HEADER - " + header.getName() + ":" + header.getValue());
+							if(header.getName().toLowerCase().equals("References".toLowerCase())){
+								message.addHeader("References", header.getValue());
+								logger.debug(mail.getHash(), "Adding " + "References:" + header.getValue());
+							} else if (header.getName().toLowerCase().equals("Message-ID".toLowerCase())){
+								logger.debug(mail.getHash(), "Adding " + "In-Reply-To:" + header.getValue());
+								logger.debug(mail.getHash(), "Adding " + "References:" + header.getValue());
+								message.addHeader("References", header.getValue());
+								message.setHeader("In-Reply-To", header.getValue());
+							}
+					    }
+					}
+					
+				} catch (Exception e){
+					logger.info(mail.getHash(), "could not retrieve header info from source mail", e);
+				}
 				message.setContent(multipart);
 				if (mail.getSubject() != null) message.setSubject(mail.getSubject());
 				if (mail.getAddressesTo() != null && mail.getAddressesTo().length > 0){
@@ -110,7 +146,7 @@ public class GmailService {
 		return result;
 	}
 	
-	private MimeMessage buildNewMimeMessage_WithHeadersForReply(Mail mail) {
+	private MimeMessage buildNewMimeMessage_AsReply(Mail mail, Multipart multipart) {
 		Properties props = new Properties();
 	    Session session = Session.getDefaultInstance(props, null);
 	    MimeMessage message = new MimeMessage(session);
@@ -122,8 +158,11 @@ public class GmailService {
 		if (gmail != null){
 			try {
 					Message origMessage = gmail.users().messages().get("apps.engine@mci-group.com", mail.getMailId()).setFormat("raw").execute();
+					MimeBodyPart forwardedContent = new MimeBodyPart();
 				    byte[] emailBytes = Base64.decodeBase64(origMessage.getRaw());
 				    MimeMessage emailOrig = new MimeMessage(session, new ByteArrayInputStream(emailBytes));
+				    forwardedContent.setDataHandler(emailOrig.getDataHandler());
+				    multipart.addBodyPart(forwardedContent);
 				    Enumeration<Header> allHeaders =  emailOrig.getAllHeaders();
 					if (allHeaders != null) {
 						while (allHeaders.hasMoreElements()) {
@@ -157,6 +196,15 @@ public class GmailService {
 		Message message = new Message();
 		message.setRaw(encodedEmail);
 		return message;
+	}
+	
+	private String convert(byte[] data) {
+	    StringBuilder sb = new StringBuilder(data.length);
+	    for (int i = 0; i < data.length; ++ i) {
+	        if (data[i] < 0) throw new IllegalArgumentException();
+	        sb.append((char) data[i]);
+	    }
+	    return sb.toString();
 	}
 
 }
