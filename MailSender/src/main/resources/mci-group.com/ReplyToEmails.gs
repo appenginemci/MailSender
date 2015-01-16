@@ -311,7 +311,7 @@ function sendReply() {
                   var newFile = DriveApp.getFileById(newDocId)
                   tempFolder.addFile(newFile)
                   DriveApp.removeFile(newFile)
-                  //newFile = newFile.setOwner("mci.project@demo.sogeti-reseller.com")
+                  //newFile = newFile.setOwner("apps.engine@mci-group.com")
        
                   var jsonObject = new Object()
                   jsonObject.threadId = threadId
@@ -562,7 +562,7 @@ function containsString(baseString, searchString) {
 }
 
 function callWebservice(json){
-  var url = "https://smooth-tesla-778.appspot.com/mail/send";
+  var url = "https://symbolic-object-755.appspot.com/mail/send";
   var payload = JSON.stringify(json);
   var headers = { "Accept":"application/json", 
               "Content-Type":"application/json", 
@@ -614,7 +614,7 @@ function processFile(formObject) {
   } else {
     var formBlob = formObject.myFile;
     var driveFile = tempFolder.createFile(formBlob);
-    driveFile = driveFile.setOwner("mci.project@demo.sogeti-reseller.com")
+    driveFile = driveFile.setOwner("apps.engine@mci-group.com")
     var attachmentTab = getTable("Attachments:", DocumentApp.ParagraphHeading.HEADING2) 
     if (attachmentTab == null) {
       showAlert("Incorrect mail form. Please refresh the mail form through 'Reset Reply' menu item, and write again your reply.")

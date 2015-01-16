@@ -1,9 +1,10 @@
 package com.sogeti.mci.mailsend.security;
 
 import java.io.File;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
+
 
 //import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ public class GoogleServiceInitializator {
 	
 	private GoogleCredential googleCredentialDrive = null;
 	private GoogleCredential googleCredentialGmail = null;
+	
+	private Properties properties = loadProperties();
 
 	public Drive getDriveService(){
 		Drive drive = null;
@@ -68,9 +71,7 @@ public class GoogleServiceInitializator {
 		HttpTransport httpTransport = new NetHttpTransport();
 		JacksonFactory jsonFactory = new JacksonFactory();
 		GoogleCredential googleCredential = null;
-		Properties properties = new Properties();
 		try {
-			properties.load(GoogleServiceInitializator.class.getResourceAsStream("/drive-api-settings.properties"));
 			logger.debug("", "Certificate Path: " + "/" + properties.getProperty("service.certificate.path"));
 			logger.debug("", "Service Account Email: " + properties.getProperty("service.account.email"));
 			File pk12File = new File(GoogleServiceInitializator.class.getResource("/" + properties.getProperty("service.certificate.path")).toURI());
@@ -94,9 +95,8 @@ public class GoogleServiceInitializator {
 		HttpTransport httpTransport = new NetHttpTransport();
 		JacksonFactory jsonFactory = new JacksonFactory();
 		GoogleCredential googleCredential = null;
-		Properties properties = new Properties();
+
 		try {
-			properties.load(GoogleServiceInitializator.class.getResourceAsStream("/drive-api-settings.properties"));
 			logger.debug("", "Certificate Path: " + "/" + properties.getProperty("service.certificate.path"));
 			logger.debug("", "Service Account Email: " + properties.getProperty("service.account.email"));
 			File pk12File = new File(GoogleServiceInitializator.class.getResource("/" + properties.getProperty("service.certificate.path")).toURI());
@@ -106,7 +106,7 @@ public class GoogleServiceInitializator {
 			.setJsonFactory(jsonFactory)
 			.setServiceAccountId(properties.getProperty("service.account.email"))
 			.setServiceAccountScopes(getScopeGmail())
-			.setServiceAccountUser("apps.engine@mci-group.com")
+			.setServiceAccountUser(properties.getProperty("user.email"))
 			//.setServiceAccountUser("event.test.1@mci-group.com")
 			//.setServiceAccountUser("arnaud.landier@mci-group.com")
 			//.setServiceAccountUser(properties.getProperty("user.email"))
@@ -130,6 +130,20 @@ public class GoogleServiceInitializator {
 		scopes.add(GmailScopes.GMAIL_READONLY);
 		scopes.add(GmailScopes.GMAIL_COMPOSE);
 		return scopes;
+	}
+	
+	private Properties loadProperties() {
+		Properties properties = new Properties();
+		try {
+			properties.load(GoogleServiceInitializator.class.getResourceAsStream("/drive-api-settings.properties"));
+		} catch (IOException e) {
+			logger.error("", "Failed to initialize Properties in Google Services", e);
+		}
+		return properties;
+	}
+	
+	public Properties getProperties() {
+		return properties;
 	}
 	
 

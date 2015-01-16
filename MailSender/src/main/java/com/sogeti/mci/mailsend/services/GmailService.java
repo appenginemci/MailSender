@@ -3,12 +3,9 @@ package com.sogeti.mci.mailsend.services;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Properties;
 
-import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -17,14 +14,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-
-
-
-
-
-
-
-
 
 //import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +56,8 @@ public class GmailService {
 					Properties props = new Properties();
 				    Session session = Session.getDefaultInstance(props, null);
 				    message = new MimeMessage(session);
-					Message origMessage = gmail.users().messages().get("apps.engine@mci-group.com", mail.getMailId()).setFormat("raw").execute();
-				    byte[] emailBytes = Base64.decodeBase64(origMessage.getRaw());
+					Message origMessage = gmail.users().messages().get(googleServiceInitializator.getProperties().getProperty("user.email"), mail.getMailId()).setFormat("raw").execute();
+					byte[] emailBytes = Base64.decodeBase64(origMessage.getRaw());
 				    /*String previousEmailContent = convert(emailBytes);
 				    logger.debug(mail.getHash(), "previous email: " + previousEmailContent);*/
 				   
@@ -127,7 +116,7 @@ public class GmailService {
 				}
 
 				logger.debug(mail.getHash(), "about to call Gmail API");
-				gmailMessage = gmail.users().messages().send("apps.engine@mci-group.com", gmailMessage).execute();
+				gmailMessage = gmail.users().messages().send(googleServiceInitializator.getProperties().getProperty("user.email"), gmailMessage).execute();
 				//gmailMessage = gmail.users().messages().send("event.test.1@mci-group.com", gmailMessage).execute();
 				//gmailMessage = gmail.users().messages().send("arnaud.landier@mci-group.com", gmailMessage).execute();
 				logger.debug(mail.getHash(), gmailMessage.toPrettyString());
@@ -157,7 +146,7 @@ public class GmailService {
 		}
 		if (gmail != null){
 			try {
-					Message origMessage = gmail.users().messages().get("apps.engine@mci-group.com", mail.getMailId()).setFormat("raw").execute();
+					Message origMessage = gmail.users().messages().get(googleServiceInitializator.getProperties().getProperty("user.email"), mail.getMailId()).setFormat("raw").execute();
 					MimeBodyPart forwardedContent = new MimeBodyPart();
 				    byte[] emailBytes = Base64.decodeBase64(origMessage.getRaw());
 				    MimeMessage emailOrig = new MimeMessage(session, new ByteArrayInputStream(emailBytes));
