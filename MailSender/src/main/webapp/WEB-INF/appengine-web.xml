@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-    <application>smooth-tesla-778</application>
+<!--     <application>smooth-tesla-778</application> -->
+	<application>sogeti-mailsender</application>
     <version>01</version>
     <threadsafe>true</threadsafe>
 	<use-google-connector-j>true</use-google-connector-j>
